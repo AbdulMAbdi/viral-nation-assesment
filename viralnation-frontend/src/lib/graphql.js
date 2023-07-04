@@ -6,23 +6,47 @@ const graphqlQueries = {
             description
             firstName, 
             lastName, 
+            email, isVerified}
+      
+          }
+        `,
+    variables: {},
+  },
+  getEmails: {
+    operationName: "feed",
+    query: `query 
+          feed { feed {
             email}
       
           }
         `,
     variables: {},
   },
-  getProfile: {
-    operationName: "getProfile",
+  getProfilesSortEmail: {
+    operationName: "feedSortEmail",
     query: `query 
-          getProfile($email:String!) { getProfile(email:$email) {      avatarUrl
+          feedSortEmail($sort:String!) {   feedSortEmail(sort:$sort)  { avatarUrl
             description
-            username
+            firstName, 
+            lastName, 
+            email, isVerified}
+      
+          }
+        `,
+    variables: {},
+  },
+  getProfiles: {
+    operationName: "getProfiles",
+    query: `query 
+          getProfiles($name:String!) { getProfiles(name:$name) {      avatarUrl
+            description
+            firstName
+            lastName
             email}
       
           }
         `,
-    variables: { username: "Scottie1" },
+    variables: {},
   },
   createProfile: {
     operationName: "postProfile",
@@ -43,6 +67,19 @@ const graphqlQueries = {
     query: `mutation
         updateProfile($avatarUrl: String!, $desc: String!, $firstName:String!, $lastName: String!, $email: String!, $verified: Boolean!) { updateProfile(firstName:$firstName, lastName:$lastName, 
             avatarUrl:$avatarUrl, description: $desc, email: $email, isVerified: $verified ) {      avatarUrl
+          description
+          firstName
+          lastName
+          email}
+    
+        }
+      `,
+    variables: {},
+  },
+  deleteProfile: {
+    operationName: "deleteProfile",
+    query: `mutation
+        deleteProfile($email: String!) { deleteProfile(email: $email) {      avatarUrl
           description
           firstName
           lastName
@@ -73,6 +110,16 @@ export async function graphqlRequest(operationName, variables, callback) {
   const response = await fetch(endpoint, options);
 
   const data = await response.json();
-  console.log(data);
-  callback(data.data.feed);
+  if (operationName === "getProfilesSortEmail") {
+    callback(data.data.feedSortEmail);
+  }
+  if (operationName === "getAll") {
+    callback(data.data.feed);
+  }
+  if (operationName === "getEmails") {
+    callback(data.data.feed.map((profile) => profile.email));
+  }
+  if (operationName === "getProfiles") {
+    callback(data.data);
+  }
 }

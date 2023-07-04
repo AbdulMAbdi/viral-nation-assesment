@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Button } from "@mui/material";
 import Box from "@mui/material/Box";
 import { graphqlRequest } from "./lib/graphql";
 import { Typography } from "@mui/material";
 import { SvgIcon } from "@mui/material";
 import { Switch } from "@mui/material";
+import { useDataStore } from "./store/profileStore";
+import { InputLabel } from "@mui/material";
+import "./ProfileForm.css";
 
 export default function ProfileForm({
   formText,
@@ -17,18 +20,52 @@ export default function ProfileForm({
   },
   setClose,
 }) {
-  console.log(setClose);
   const [formData, setFormData] = useState(profile);
   const [verified, setVerfied] = useState(false);
+  const [emails, mode] = useDataStore((state) => [state.emails, state.mode]);
+  const [errors, setErrors] = useState({});
+  const validate = (fieldValues = formData) => {
+    let temp = { ...errors };
+
+    if ("email" in fieldValues) {
+      temp.email = fieldValues.email ? "" : "This field is required.";
+      if (fieldValues.email)
+        temp.email = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(fieldValues.email)
+          ? ""
+          : "Email is not valid.";
+      for (let email of emails) {
+        if (email === fieldValues.email) {
+          temp.email = "Email is already in use.";
+        }
+      }
+    }
+    if ("description" in fieldValues) {
+      temp.description =
+        fieldValues.description.length <= 300
+          ? ""
+          : "Please limit description to 300 characters";
+    }
+
+    setErrors({
+      ...temp,
+    });
+  };
+
   const handleClose = () => {
     setClose(false);
   };
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData({
+      ...formData,
       [name]: value,
-    }));
+    });
+    validate({ [name]: value });
+  };
+
+  const formIsValid = () => {
+    const isValid = Object.values(errors).every((x) => x === "");
+    return isValid;
   };
 
   const handleSubmit = async (event) => {
@@ -41,33 +78,35 @@ export default function ProfileForm({
       desc: formData.description,
       verified: verified,
     };
-    graphqlRequest(
-      formText === "Create" ? "createProfile" : "updateProfile",
-      variables,
-      console.log
-    );
-
-    setClose(false);
+    if (formIsValid()) {
+      graphqlRequest(
+        formText === "Create Profile" ? "createProfile" : "updateProfile",
+        variables,
+        () => {}
+      );
+      setClose(false);
+    }
   };
+  useEffect(() => {}, [errors]);
 
   return (
     <>
-
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <Box
-        sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 768,
-          height: "100%",
-          bgcolor: "background.paper",
-          border: "2px solid #000",
-          boxShadow: 24,
-          p: 4,
-        }}
-      >
+          className={"ProfileFormBox"}
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "100%",
+            height: "100%",
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -120,12 +159,13 @@ export default function ProfileForm({
               </svg>
             </SvgIcon>
           </Box>
+          <InputLabel size={"small"}>Image Link</InputLabel>
           <TextField
             sx={{
               display: "flex",
               alignSelf: "flex-end",
               alignItems: "center",
-              padding: "10px 8px",
+              // padding: "10px 8px",
               height: "40px",
             }}
             name="avatarUrl"
@@ -148,7 +188,6 @@ export default function ProfileForm({
                 display: "flex",
                 alignSelf: "stretch",
                 alignItems: "center",
-                padding: "10px 8px",
                 height: "40px",
               }}
               name="firstName"
@@ -163,7 +202,6 @@ export default function ProfileForm({
                 display: "flex",
                 alignSelf: "stretch",
                 alignItems: "center",
-                padding: "10px 8px",
                 height: "40px",
               }}
               name="lastName"
@@ -174,29 +212,31 @@ export default function ProfileForm({
               margin="normal"
             />
           </Box>
-
+          <InputLabel size={"small"}>Email</InputLabel>
           <TextField
             sx={{
               display: "flex",
               alignSelf: "flex-end",
               alignItems: "center",
-              padding: "10px 8px 20px",
               height: "40px",
             }}
             name="email"
             label="Email"
             value={formData.email}
+            {...(errors["email"] && {
+              error: true,
+              helperText: errors["email"],
+            })}
             onChange={handleChange}
             fullWidth
             margin="normal"
           />
-
+          <InputLabel size={"small"}>Description</InputLabel>
           <TextField
             sx={{
               display: "flex",
               alignSelf: "stretch",
               alignItems: "flex-start",
-              padding: "20px 8px",
               flex: "1 0 0",
               height: "124px",
             }}
@@ -204,6 +244,10 @@ export default function ProfileForm({
             label="Write a description for the talent"
             value={formData.description}
             onChange={handleChange}
+            {...(errors["description"] && {
+              error: true,
+              helperText: errors["description"],
+            })}
             fullWidth
             multiline
             rows={4}
@@ -212,15 +256,16 @@ export default function ProfileForm({
           <Box
             sx={{
               display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              width: "672px",
+              flexDirection: "row",
+              width: "100%",
               hieght: "88px",
               gap: "16px",
-              paddingTop: "40px",
+              paddingTop: "20px",
               paddingLeft: "20px",
-              alignItems: "flex-start",
+              paddingBottom: "20px",
+              alignItems: "flex-end",
               alignSelf: "stretch",
+              bgcolor: mode === "light" ? "grey.200" : "grey.900",
             }}
           >
             <Typography
@@ -241,23 +286,30 @@ export default function ProfileForm({
               onChange={() => setVerfied(!verified)}
               sx={{
                 alignSelf: "flex-end",
+                marginLeft: "60%",
+                justifyContent: "flex-end",
+                paddingLeft: "40px",
               }}
             />
           </Box>
 
           <Button
             sx={{
+              display: "flex",
+              justifyContent: "flex-end",
               alignSelf: "flex-end",
+              marginLeft: "75%",
+              marginTop: "4%",
             }}
             variant="contained"
             type="submit"
             color="primary"
+            disabled={!formIsValid()}
           >
             {formText}
           </Button>
-      </Box>
-        </form>
-
+        </Box>
+      </form>
     </>
   );
 }

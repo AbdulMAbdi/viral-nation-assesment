@@ -5,11 +5,15 @@ import Header from "./Header";
 import GridHeader from "./GridHeader";
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
 import { graphqlRequest } from "./lib/graphql";
+import { useDataStore } from "./store/profileStore";
 
 function App() {
-  const [profiles, setProfiles] = React.useState([]);
-  const [mode, setMode] = React.useState("light");
-
+  const [profiles, filteredProfiles, mode, actions] = useDataStore((state) => [
+    state.profiles,
+    state.filteredProfiles,
+    state.mode,
+    state.actions,
+  ]);
   const theme = React.useMemo(
     () =>
       createTheme({
@@ -18,33 +22,45 @@ function App() {
           mode: mode,
           background: {
             dark: "hsl(230, 17%, 14%)",
-            light: "hsl(0, 0%, 100%)",
+            light: "#121212",
           },
         },
       }),
     [mode]
   );
   React.useEffect(() => {
-    graphqlRequest("getAll", {}, setProfiles);
-  }, []);
-  console.log(theme);
+    if (mode === "") {
+      actions.setMode("light");
+    }
+  }, [mode, actions]);
 
+  React.useEffect(() => {
+    graphqlRequest("getAll", {}, actions.updateProfiles);
+    graphqlRequest("getEmails", {}, actions.updateEmails);
+  }, [actions]);
+  React.useEffect(() => {
+    if (profiles.length > 0) {
+      actions.updateFilteredProfiles(profiles);
+    }
+  }, [actions, profiles]);
   return (
     <>
-      <ThemeProvider theme={theme}>
-        <CssBaseline enableColorScheme />
-        <Header setMode={setMode} mode={mode}></Header>
-        {profiles.length > 0 && (
-          <div className="App">
-            <GridHeader></GridHeader>
-            <ResponsiveGrid
-              profiles={profiles}
-              theme={theme}
-              mode={mode}
-            ></ResponsiveGrid>
-          </div>
-        )}
-      </ThemeProvider>
+      {mode && (
+        <ThemeProvider theme={theme}>
+          <CssBaseline enableColorScheme />
+          <Header theme={theme}></Header>
+          {profiles.length > 0 && (
+            <div className="App">
+              <GridHeader></GridHeader>
+              <ResponsiveGrid
+                profiles={filteredProfiles}
+                theme={theme}
+                mode={mode}
+              ></ResponsiveGrid>
+            </div>
+          )}
+        </ThemeProvider>
+      )}
     </>
   );
 }

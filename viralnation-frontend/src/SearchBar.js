@@ -1,45 +1,8 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
 import { debounce } from "@mui/material/utils";
-
-async function profileFetch({ input: inputValue }, callback) {
-  console.log("here", inputValue);
-  const graphqlQuery = {
-    operationName: "getProfile",
-    query: `query 
-        getProfile($username:String!) { getProfile(username:$username) {      avatarUrl
-          description
-          username
-          email}
-    
-        }
-      `,
-    variables: { username: inputValue },
-  };
-
-  const headers = {
-    "content-type": "application/json",
-    Authorization: "<token>",
-  };
-
-  const options = {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify(graphqlQuery),
-  };
-
-  const endpoint = "http://localhost:4000/graphql";
-
-  const response = await fetch(endpoint, options);
-
-  const data = await response.json();
-  console.log(data.data.getProfile);
-  callback(data.data);
-}
+import { graphqlRequest } from "./lib/graphql";
 
 export default function SearchBar() {
   const [value, setValue] = React.useState(null);
@@ -49,7 +12,7 @@ export default function SearchBar() {
   const fetch = React.useMemo(
     () =>
       debounce((request, callback) => {
-        profileFetch(request, callback);
+        graphqlRequest("getProfiles", request, callback);
       }, 500),
     []
   );
@@ -62,8 +25,7 @@ export default function SearchBar() {
       return undefined;
     }
 
-    fetch({ input: inputValue }, (results) => {
-      console.log(results);
+    fetch({ name: inputValue }, (results) => {
       if (active) {
         let newOptions = [];
 
@@ -71,9 +33,13 @@ export default function SearchBar() {
           newOptions = [value];
         }
 
-        if (results.getProfile) {
-          console.log(results);
-          newOptions = [...newOptions, ...results.getProfile.username];
+        if (results.getProfiles) {
+          let nameResults = [];
+
+          for (let profile of results.getProfiles) {
+            nameResults.push(profile.firstName + " " + profile.lastName);
+          }
+          newOptions = [...newOptions, ...nameResults];
         }
 
         setOptions(newOptions);
@@ -88,7 +54,7 @@ export default function SearchBar() {
   return (
     <Autocomplete
       id="google-map-demo"
-      sx={{ width: "100%", height: "100%" }}
+      sx={{ width: "100%", maxHeight: "100%" }}
       getOptionLabel={(option) =>
         typeof option === "string" ? option : option.description
       }
@@ -107,7 +73,13 @@ export default function SearchBar() {
         setInputValue(newInputValue);
       }}
       renderInput={(params) => (
-        <TextField {...params} label="Search" fullWidth />
+        <TextField
+          sx={{ height: "24px" }}
+          {...params}
+          label="Search"
+          size="small"
+          fullWidth
+        />
       )}
     />
   );

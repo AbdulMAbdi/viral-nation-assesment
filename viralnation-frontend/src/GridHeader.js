@@ -5,6 +5,9 @@ import { Button } from "@mui/material";
 import { SvgIcon } from "@mui/material";
 import { Modal } from "@mui/material";
 import ProfileForm from "./ProfileForm";
+import SortToggleButtons from "./SortToggleButtons";
+
+import "./GridHeader.css";
 
 export default function GridHeader() {
   const [createProfile, setCreateProfile] = React.useState(false);
@@ -16,19 +19,21 @@ export default function GridHeader() {
   return (
     <>
       <Box
+        className={"GridheaderBox"}
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           alignSelf: "stretch",
           width: "75%",
-          paddingBottom: '20px'
+          paddingBottom: "20px",
         }}
       >
         <Box
           sx={{
             display: "flex",
             height: "40px",
+            paddingBottom: "12px",
             alignItems: "center",
             gap: "10px",
             flex: "1 0 0",
@@ -43,9 +48,10 @@ export default function GridHeader() {
             alignItems: "center",
             padding: "8px 12px",
             gap: "8px",
+            height: "100%",
           }}
         >
-          <Button onClick={handleCreateProfile}>
+          <Button variant="outlined" onClick={handleCreateProfile}>
             <SvgIcon
               sx={{
                 width: "24px",
@@ -71,6 +77,7 @@ export default function GridHeader() {
             {"Create Profile"}
           </Button>
         </Box>
+        <SortToggleButtons></SortToggleButtons>
       </Box>
       {createProfile && (
         <Modal
@@ -91,7 +98,7 @@ export default function GridHeader() {
         >
           <ProfileForm
             setClose={setCreateProfile}
-            formText={"Create"}
+            formText={"Create Profile"}
           ></ProfileForm>
         </Modal>
       )}

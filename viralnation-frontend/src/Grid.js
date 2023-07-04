@@ -1,11 +1,9 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import BasicCard from "./Card";
 import Pagination from "@mui/material/Pagination";
 
 export default function ResponsiveGrid({ profiles, theme, mode }) {
-  console.log(profiles);
   const [profileChunks, setProfileChunks] = React.useState([]);
   const [page, setPage] = React.useState(1);
   React.useEffect(() => {
@@ -20,8 +18,6 @@ export default function ResponsiveGrid({ profiles, theme, mode }) {
     setPage(value);
   };
 
-  console.log(profileChunks);
-  console.log(theme);
   return (
     <>
       {profileChunks.length > 0 && (
@@ -49,6 +45,10 @@ export default function ResponsiveGrid({ profiles, theme, mode }) {
             })}
           </Grid>
           <Pagination
+            sx={{
+              paddingTop: "10px",
+              alignSelf: "flex-end",
+            }}
             count={profileChunks.length}
             page={page}
             boundaryCount={1}

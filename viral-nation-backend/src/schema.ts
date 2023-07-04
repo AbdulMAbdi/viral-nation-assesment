@@ -6,7 +6,9 @@ const typeDefinitions = /* GraphQL */ `
   type Query {
     info: String!
     feed: [Profile!]!
-    getProfile(email: String!): Profile
+    getProfiles(name: String!): [Profile]
+    feedSortEmail(sort: String!): [Profile!]!
+    feedSortVerified(sort: String!): [Profile!]!
   }
 
   type Mutation {
@@ -26,6 +28,7 @@ const typeDefinitions = /* GraphQL */ `
       isVerified: Boolean
       email: String!
     ): Profile!
+    deleteProfile(email: String!): Profile!
   }
 
   type Profile {
@@ -50,19 +53,45 @@ const resolvers = {
   Query: {
     feed: (parent: unknown, args: {}, context: GraphQLContext) =>
       context.prisma.profile.findMany(),
-    async getProfile(
+    feedSortEmail: (
+      parent: unknown,
+      args: { sort: string },
+      context: GraphQLContext
+    ) =>
+      context.prisma.profile.findMany({
+        orderBy: {
+          email: args.sort == "desc" ? "desc" : "asc",
+        },
+      }),
+    feedSortVerified: (
+      parent: unknown,
+      args: { sort: string },
+      context: GraphQLContext
+    ) =>
+      context.prisma.profile.findMany({
+        orderBy: {
+          isVerified: args.sort == "desc" ? "desc" : "asc",
+        },
+      }),
+
+    async getProfiles(
       parent: unknown,
       args: {
-        email: string;
+        name: string;
       },
       context: GraphQLContext
     ) {
-      const foundProfile = await context.prisma.profile.findFirst({
+      const foundProfiles = await context.prisma.profile.findMany({
         where: {
-          email: args.email,
+          firstName: {
+            search: args.name,
+          },
+          lastName: {
+            search: args.name,
+          },
         },
       });
-      return foundProfile;
+      return foundProfiles;
     },
   },
   Mutation: {
@@ -112,6 +141,20 @@ const resolvers = {
           firstName: args.firstName,
           lastName: args.lastName,
           isVerified: args.isVerified,
+        },
+      });
+      return updatedProfile;
+    },
+    async deleteProfile(
+      parent: unknown,
+      args: {
+        email: string;
+      },
+      context: GraphQLContext
+    ) {
+      const updatedProfile = await context.prisma.profile.delete({
+        where: {
+          email: args.email,
         },
       });
       return updatedProfile;

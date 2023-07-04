@@ -9,19 +9,24 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import ProfileForm from "./ProfileForm";
 import Modal from "@mui/material/Modal";
+import DeleteProfileAlert from "./DeleteProfileAlert";
 
-export default function BasicCard({ profile, theme, mode }) {
+export default function BasicCard({ profile }) {
   const [showMenu, setShowMenu] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [showUpdate, setShowUpdate] = React.useState(false);
+  const [showDelete, setShowDelete] = React.useState(false);
 
   const handleClick = (event) => {
-    console.log(showMenu);
     setShowMenu(!showMenu);
     setAnchorEl(event.currentTarget);
   };
   const handleMenuClick = () => {
     setShowUpdate(!showUpdate);
+  };
+
+  const handleRemoveClick = () => {
+    setShowDelete(!showDelete);
   };
   return (
     <>
@@ -101,35 +106,37 @@ export default function BasicCard({ profile, theme, mode }) {
                     color="text.primary"
                     gutterBottom
                   >
-                    {profile.username}
+                    {profile.firstName + " " + profile.lastName}
                   </Typography>
-                  <SvgIcon
-                    sx={{
-                      width: "16px",
-                      height: "16px",
-                    }}
-                  >
-                    <svg
-                      width="16"
-                      height="18"
-                      viewBox="0 0 16 18"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                  {profile.isVerified && (
+                    <SvgIcon
+                      sx={{
+                        width: "16px",
+                        height: "16px",
+                      }}
                     >
-                      <g id="accreditation badge">
-                        <path
-                          id="Star 2"
-                          d="M6.56148 1.4818C7.33823 0.645662 8.66174 0.645662 9.43849 1.4818C9.9011 1.97976 10.5883 2.20306 11.2553 2.07211C12.3752 1.85223 13.4459 2.63017 13.5828 3.76318C13.6644 4.43795 14.0891 5.02255 14.7057 5.30864C15.7409 5.78899 16.1499 7.04772 15.5947 8.04484C15.2641 8.63868 15.2641 9.36129 15.5947 9.95513C16.1499 10.9522 15.7409 12.211 14.7057 12.6913C14.0891 12.9774 13.6644 13.562 13.5828 14.2368C13.4459 15.3698 12.3752 16.1477 11.2553 15.9279C10.5883 15.7969 9.9011 16.0202 9.43849 16.5182C8.66174 17.3543 7.33823 17.3543 6.56148 16.5182C6.09888 16.0202 5.41163 15.7969 4.74468 15.9279C3.62481 16.1477 2.55407 15.3698 2.41713 14.2368C2.33557 13.562 1.91083 12.9774 1.29429 12.6913C0.259045 12.211 -0.149942 10.9522 0.405239 9.95513C0.735883 9.36129 0.735883 8.63868 0.405239 8.04484C-0.149941 7.04772 0.259045 5.78899 1.29429 5.30864C1.91083 5.02255 2.33557 4.43795 2.41713 3.76318C2.55407 2.63017 3.62481 1.85223 4.74468 2.07211C5.41163 2.20306 6.09888 1.97976 6.56148 1.4818Z"
-                          fill="#3B94ED"
-                        />
-                        <path
-                          id="V"
-                          d="M6.55416 6.02386L8.47302 10.7418L7.72332 10.5905L9.46368 6.02386H10.9988L8 12.8782L5.00122 6.02386H6.55416Z"
-                          fill="white"
-                        />
-                      </g>
-                    </svg>
-                  </SvgIcon>
+                      <svg
+                        width="16"
+                        height="18"
+                        viewBox="0 0 16 18"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g id="accreditation badge">
+                          <path
+                            id="Star 2"
+                            d="M6.56148 1.4818C7.33823 0.645662 8.66174 0.645662 9.43849 1.4818C9.9011 1.97976 10.5883 2.20306 11.2553 2.07211C12.3752 1.85223 13.4459 2.63017 13.5828 3.76318C13.6644 4.43795 14.0891 5.02255 14.7057 5.30864C15.7409 5.78899 16.1499 7.04772 15.5947 8.04484C15.2641 8.63868 15.2641 9.36129 15.5947 9.95513C16.1499 10.9522 15.7409 12.211 14.7057 12.6913C14.0891 12.9774 13.6644 13.562 13.5828 14.2368C13.4459 15.3698 12.3752 16.1477 11.2553 15.9279C10.5883 15.7969 9.9011 16.0202 9.43849 16.5182C8.66174 17.3543 7.33823 17.3543 6.56148 16.5182C6.09888 16.0202 5.41163 15.7969 4.74468 15.9279C3.62481 16.1477 2.55407 15.3698 2.41713 14.2368C2.33557 13.562 1.91083 12.9774 1.29429 12.6913C0.259045 12.211 -0.149942 10.9522 0.405239 9.95513C0.735883 9.36129 0.735883 8.63868 0.405239 8.04484C-0.149941 7.04772 0.259045 5.78899 1.29429 5.30864C1.91083 5.02255 2.33557 4.43795 2.41713 3.76318C2.55407 2.63017 3.62481 1.85223 4.74468 2.07211C5.41163 2.20306 6.09888 1.97976 6.56148 1.4818Z"
+                            fill="#3B94ED"
+                          />
+                          <path
+                            id="V"
+                            d="M6.55416 6.02386L8.47302 10.7418L7.72332 10.5905L9.46368 6.02386H10.9988L8 12.8782L5.00122 6.02386H6.55416Z"
+                            fill="white"
+                          />
+                        </g>
+                      </svg>
+                    </SvgIcon>
+                  )}
                 </Box>
                 <Typography
                   sx={{
@@ -184,7 +191,9 @@ export default function BasicCard({ profile, theme, mode }) {
                 <MenuItem key={"edit"} onClick={handleMenuClick}>
                   {"Edit profile"}
                 </MenuItem>
-                <MenuItem key={"remove"}>{"Remove profile"}</MenuItem>
+                <MenuItem key={"remove"} onClick={handleRemoveClick}>
+                  {"Remove profile"}
+                </MenuItem>
               </Menu>
             </Box>
           </Box>
@@ -229,6 +238,13 @@ export default function BasicCard({ profile, theme, mode }) {
             profile={profile}
           ></ProfileForm>
         </Modal>
+      )}
+      {showDelete && (
+        <DeleteProfileAlert
+          setOpen={setShowDelete}
+          open={showDelete}
+          email={profile.email}
+        ></DeleteProfileAlert>
       )}
     </>
   );

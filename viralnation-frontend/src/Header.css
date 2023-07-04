@@ -1,0 +1,78 @@
+@media screen and (max-width: 780px) {
+  .Header {
+    width: 380px;
+    height: 56px;
+    top: 0;
+    position: fixed;
+    display: flex;
+    padding: 35px 28px 30px;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+  }
+  .logoIcon {
+    width: "33px";
+    height: "32px";
+  }
+  .logoBox {
+    width: 3%;
+    flex-direction: row;
+    padding-left: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .logoText {
+    font-size: 14;
+    font-family: "Roboto";
+    font-style: "normal";
+    font-weight: "400";
+    line-height: 24px;
+    letter-spacing: 0.5px;
+    align-self: flex-end;
+  }
+  .sliderBox {
+    width: "10.5%";
+    height: "2.2%";
+    display: "flex";
+    gap: "16px";
+    justify-content: "center";
+    align-items: "flex-start";
+  }
+}
+@media screen and (min-width: 790px) {
+  .Header {
+    width: 100%;
+    height: 0%;
+    top: 0;
+    position: fixed;
+    display: flex;
+    padding: 40px 40px 40px 20px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logoBox {
+    width: 6%;
+    flex-direction: row;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .logoText {
+    font-size: 14;
+    font-family: "Roboto";
+    font-style: "normal";
+    font-weight: "400";
+    line-height: "2.5%";
+    letter-spacing: 0.5px;
+    align-self: flex-end;
+  }
+  .sliderBox {
+    width: "10.5%";
+    height: "2.2%";
+    display: "flex";
+    gap: "16px";
+    justify-content: "center";
+    align-items: "flex-start";
+  }
+}
